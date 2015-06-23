@@ -5,40 +5,37 @@
 #v0.10		2014-11-08 Added return to printmessage functoin
 #v0.11		2014-11-15 Added Function SetMessage
 #v0.12		2015-04-26 Translated funcions name to english
-class ErrorMessage {
+#v0.2		2015-06-23 No HTML output, same thing less code, 
+class ErrorMessage 
+{
 	
-	var $SFSG;
-	var $msg_ok;
-	var $msg_ko;
-	var $Errori;
-	var $IndiceErrori;
+	protected $SFSG;
+	protected $msg_ok;
+	protected $msg_ko;
+	protected $error_index;
 
-	//Costruttore
-	function ErrorMessage(){
-	}
+	function newForm($ok,$ko,$DatiForm){
 
-	function NewForm($ok,$ko,$DatiForm){
-		$this->StartSession();
+		session_start();
 		$this->SFSG = 1;	
 		$this->msg_ok = $ok;
 		$this->msg_ko = $ko;
-		$this->IndiceErrori = 0;
-		$this->ResetSessionData();
-		$this->SetMessage($ok,$ko);
+		$this->error_index = 0;
+		$this->resetSessionData();
+		$this->setMessage($ok,$ko);
 		$_SESSION['ErrorMessage']['formVar'] = $DatiForm;
 	}
 
-	function SetMessage($ok,$ko){
+	function resetSessionData(){
+		unset($_SESSION['ErrorMessage']);
+	}
+
+	function setMessage($ok,$ko){
 		$_SESSION['ErrorMessage']['MessaggioKo'] = $ko;
 		$_SESSION['ErrorMessage']['MessaggioOk'] = $ok;
  	}
 
-
-	function ResetSessionData(){
-		unset($_SESSION['ErrorMessage']);
-	}
-
-	function SoFarSoGood(){
+	function soFarSoGood(){
 		if($this->SFSG){
 			return 1;	
 		}else{
@@ -46,52 +43,31 @@ class ErrorMessage {
 		}
 	}
 
-	function StartSession(){
-		session_start();
-	}
-
-	function Error($msg_errore){
+	function error($msg_errore){
 		$this->SFSG = 0;
-		//print'Errore';
-		$Errori[$this->IndiceErrori] = $msg_errore;
-		$_SESSION['ErrorMessage']['MessaggiErrore'][$this->IndiceErrori] = $msg_errore;
-		$this->IndiceErrori++;
+		$_SESSION['ErrorMessage']['MessaggiErrore'][] = $msg_errore;
+		++$this->error_index;
 	}
 
-	function PrintMessagges( &$value, $sali){
+	function getMessagges( &$value){
 		//////////////////
-		//Stampa eventuali messaggi Da modificare con il tema del sito
-		////////////
+		//Get messagges to print 
 
-		//return 1 nessun errore, return 0 errore
+		session_start();
+
+		$output = array();
 		if(isset($_SESSION['ErrorMessage']['MessaggiErrore'])){
-			//Ci sono stati degli errori
-
-			echo'<div class="msg_red_container"> <br/>';
-			echo $_SESSION['ErrorMessage']['MessaggioKo'];
-			echo '<ul>';		
-					
-			//stampa lista di errori
-			for($i=0; $i<count($_SESSION['ErrorMessage']['MessaggiErrore']); $i++) 
-					echo '<li>'.$_SESSION['ErrorMessage']['MessaggiErrore'][$i].'</li>';
-			
-			echo'</ul></div>';
+			$output[] = $_SESSION['ErrorMessage']['MessaggioKo'];
 			$value = $_SESSION['ErrorMessage']['formVar'];
-			
-			$this->ResetSessionData();
-			return 0;
-	
+			$output = array_merge($output,$_SESSION['ErrorMessage']['MessaggiErrore']);
 		}elseif(isset($_SESSION['ErrorMessage'])){
-			//Non ci sono stati errori
-			echo'<div class="msg_green_container">				';
-			echo $_SESSION['ErrorMessage']['MessaggioOk'];
-			echo'</div>';
-	
-			$this->ResetSessionData();
+			 $output[] = $_SESSION['ErrorMessage']['MessaggioOk'];
+		}
+		
+		$this->resetSessionData();
 
-			return 1;
-		}else{//Modalità modifica
-			return 1;
+		if(!empty($output)) {
+			return $output;
 		}
 	}
 }

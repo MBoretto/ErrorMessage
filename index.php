@@ -1,7 +1,7 @@
 <?php
 include('ErrorMessage.class.php');
 
-session_start();
+#session_start();
 $CheckPoint = new ErrorMessage();
 #echo '<pre>';	
 #print_r($_POST);
@@ -29,32 +29,32 @@ $CheckPoint = new ErrorMessage();
 
 			//Nessuna branca spuntata
 			if($_POST['LC'] == 0 & $_POST['EG'] == 0 & $_POST['RS'] == 0 & $_POST['COCA'] == 0){
-				$CheckPoint->Error("Non hai spuntato nessuna branca!");	
+				$CheckPoint->error("Non hai spuntato nessuna branca!");	
 			}
 			
 			//Controllo non nullo uno per ogni campo Verifico che non siano nulli
-			if($_POST['anno'] == ''){ $CheckPoint->Error("Non ci sono infomazioni sull'anno dell evento! Contatta il web master."); }
-			if($_POST['tipo'] == ''){  $CheckPoint->Error("Il campo 'Tipo di evento' non può essere vuoto!");  }
-			if($_POST['luogo'] == ''){  $CheckPoint->Error("Il campo luogo non può essere vuoto!");  }
+			if($_POST['anno'] == ''){ $CheckPoint->error("Non ci sono infomazioni sull'anno dell evento! Contatta il web master."); }
+			if($_POST['tipo'] == ''){  $CheckPoint->error("Il campo 'Tipo di evento' non può essere vuoto!");  }
+			if($_POST['luogo'] == ''){  $CheckPoint->error("Il campo luogo non può essere vuoto!");  }
 		
-			if( $_POST['dataInizio']['gg'] == ''){  $CheckPoint->Error("Il campo Giorno di inizio non è stato settato!");}
-			if( $_POST['dataInizio']['mm'] == ''){  $CheckPoint->Error("Il campo Mese di inizio non è stato settato!");  }
-			if( $_POST['dataInizio']['aaaa'] == ''){  $CheckPoint->Error("Il campo Anno di inizio non è stato settato!");  }
+			if( $_POST['dataInizio']['gg'] == ''){  $CheckPoint->error("Il campo Giorno di inizio non è stato settato!");}
+			if( $_POST['dataInizio']['mm'] == ''){  $CheckPoint->error("Il campo Mese di inizio non è stato settato!");  }
+			if( $_POST['dataInizio']['aaaa'] == ''){  $CheckPoint->error("Il campo Anno di inizio non è stato settato!");  }
 	
-			if( $_POST['dataFine']['gg'] == ''){  $CheckPoint->Error("Il campo Giorno di fine non è stato settato!");}  
-			if( $_POST['dataFine']['mm'] == ''){  $CheckPoint->Error("Il campo Mese di fine non è stato settato!");  }
-			if( $_POST['dataFine']['aaaa'] == ''){  $CheckPoint->Error("Il campo Anno di fine non è stato settato!");  }
+			if( $_POST['dataFine']['gg'] == ''){  $CheckPoint->error("Il campo Giorno di fine non è stato settato!");}  
+			if( $_POST['dataFine']['mm'] == ''){  $CheckPoint->error("Il campo Mese di fine non è stato settato!");  }
+			if( $_POST['dataFine']['aaaa'] == ''){  $CheckPoint->error("Il campo Anno di fine non è stato settato!");  }
 
 			//Controllo che siano numeri
-			if(!is_numeric($_POST['dataInizio']['gg'])){ $CheckPoint->Error("Il campo Giorno di inizio deve essere un numero!"); }
-			if(!is_numeric($_POST['dataInizio']['mm'])){ $CheckPoint->Error("Il campo Mese di inizio deve essere un numero!"); }
-			if(!is_numeric($_POST['dataInizio']['aaaa'])){ $CheckPoint->Error("Il campo Anno di inizio deve essere un numero!"); }
-			if(!is_numeric($_POST['dataFine']['gg'])){ $CheckPoint->Error("Il campo Giorno di fine deve essere un numero!"); }
-			if(!is_numeric($_POST['dataFine']['mm'])){ $CheckPoint->Error("Il campo Mese di fine deve essere un numero!"); }
-			if(!is_numeric($_POST['dataFine']['aaaa'])){ $CheckPoint->Error("Il campo Anno di fine deve essere un numero!"); }
+			if(!is_numeric($_POST['dataInizio']['gg'])){ $CheckPoint->error("Il campo Giorno di inizio deve essere un numero!"); }
+			if(!is_numeric($_POST['dataInizio']['mm'])){ $CheckPoint->error("Il campo Mese di inizio deve essere un numero!"); }
+			if(!is_numeric($_POST['dataInizio']['aaaa'])){ $CheckPoint->error("Il campo Anno di inizio deve essere un numero!"); }
+			if(!is_numeric($_POST['dataFine']['gg'])){ $CheckPoint->error("Il campo Giorno di fine deve essere un numero!"); }
+			if(!is_numeric($_POST['dataFine']['mm'])){ $CheckPoint->error("Il campo Mese di fine deve essere un numero!"); }
+			if(!is_numeric($_POST['dataFine']['aaaa'])){ $CheckPoint->error("Il campo Anno di fine deve essere un numero!"); }
 
 	
-			if($CheckPoint->SoFarSoGood()){ //Invio della mail per il log\
+			if($CheckPoint->soFarSoGood()){ //Invio della mail per il log\
 
 				header("location: index.php?anno=".$_POST['anno']);
 				exit;
@@ -67,12 +67,31 @@ $CheckPoint = new ErrorMessage();
 			}
 		
 		}else{	//stampa il form
-	
+				$head=" 
+                              <html>
+                                      <head>
+                                              <title>
+                                              </title>
+                                              <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+                                      </head>
+                                      <body>
+                              
+                              
+                              ";
+				//Stampo la form
+				echo $head;
 		
 
 			$sali = '.';		
-			if($CheckPoint->PrintMessagges($value, $sali)){//$value si riempie
+			$messaggi = $CheckPoint->getMessagges($value);//$value si riempie
+		#	print_r($messaggi);
+			if(is_array($messaggi)){
+				foreach ($messaggi as $valore){
+					print $valore.'</br>';
+				}
 			}
+
+
 			if(isset($value['LC'])){
 				if($value['LC'] == 1)	$value['LC'] = 'checked';
 			}else{
@@ -101,7 +120,6 @@ $CheckPoint = new ErrorMessage();
 			if(!isset($value['tipo'])) $value['tipo']='';
 			if(!isset($value['luogo'])) $value['luogo']='';
 
-				//Stampo la form
 
 				echo '<div class="std_container">';
 
@@ -326,10 +344,9 @@ $CheckPoint = new ErrorMessage();
 
 
 				echo '</div><br/><br/><br/><br/><br/>';
+				echo '</body></html>';
 
 
-
-			//include('foot.php');
 		}
 
 
